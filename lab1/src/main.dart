@@ -6,13 +6,13 @@ import 'steps/steps.dart';
 const fileName = "res.smt2";
 
 void RunWorkflow() {
+  print("input srs: ");
   List<String> input = ReadInput();
   print("input: " + input.toString());
 
   bool valid = ValidateInput(input);
   if (!valid) {
-    print("input invalid, terminating");
-    return;
+    throw ("input invalid, terminating");
   }
   print("input validated");
 
@@ -22,7 +22,7 @@ void RunWorkflow() {
   print("wrote initial part to file");
 
   SRS srs = ParseSRS(input);
-  print("parsed SRS");
+  print("parsed srs");
 
   DumpSRSToFile(file, srs);
   print("dumped srs to file");
@@ -33,6 +33,5 @@ void RunWorkflow() {
 }
 
 void main(List<String> args) {
-  // print(isAlpha('b'.codeUnitAt(0)));
   RunWorkflow();
 }
