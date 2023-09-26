@@ -39,21 +39,25 @@ void WriteInitialPart(File f) {
   AppendFile(f, "(define-fun arc_mul ((a Int) (b Int)) Int (max a b))"); // TODO: invent me!!
 
   AppendFile(
-      f, "(define-func arc_gt ((a Int) (b Int)) Bool (ite (or (> x y) (and (= x y) (= x -1))) true false))");
+      f, "(define-fun arc_gt ((a Int) (b Int)) Bool (ite (or (> x y) (and (= x y) (= x -1))) true false))");
   AppendFile(f,
-      "(define-func arc_ge ((a Int) (b Int)) Bool (ite (or (>= x y) (and (= x y) (= x -1))) true false))\n\n");
+      "(define-fun arc_ge ((a Int) (b Int)) Bool (ite (or (>= x y) (and (= x y) (= x -1))) true false))\n\n");
 }
 
 void WriteFinalPart(File f) {
   AppendFile(f, "(get-model)");
   AppendFile(f, "(check-sat)");
-  AppendFile(f, "(exit)\n\n");
+  AppendFile(f, "(exit)");
 }
 
 SRS ParseSRS(List<String> input) {
   SRS srs = SRS();
 
   for (var line in input) {
+    int ind = line.indexOf('->');
+    srs.expressions.add(Expression.fromOperands(line.substring(0, ind),line.substring(ind+2)));
+    print(line.substring(0, ind));
+    print(line.substring(ind + 2));
     for (var rune in line.runes) {
       if (isAlpha(rune)) {
         String char = new String.fromCharCode(rune);
@@ -64,6 +68,7 @@ SRS ParseSRS(List<String> input) {
 
   return srs;
 }
+
 
 void DumpSRSToFile(File f, SRS srs) {
   AppendFile(f, srs.toString());

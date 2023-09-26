@@ -4,24 +4,24 @@
 /// 3. Dump it all with by-component comparasion
 /// 4. Write application for academic leave
 
-
 class SRS {
   Set<UniqueString> uniqueStrings = {};
 
-  Expression finalExpression = Expression();
+  List<Expression> expressions = [];
 
   @override
   String toString() {
-    // TODO: implement toString
-    return uniqueStrings.join('\n') + '\n';
+    String uniqueStringsSmt = uniqueStrings.join('\n') + '\n';
+    String expressionsSmt = expressions.join('\n') + '\n';
+    return uniqueStringsSmt + expressionsSmt;
   }
 }
 
 class UniqueString {
   String string = "";
-  
+
   UniqueString(String string) {
-    this.string  = string;
+    this.string = string;
   }
 
   @override
@@ -55,6 +55,20 @@ class ArcticOperand {
   /// How to limit it to 2x1 size?
   List<List<String>> addOperand = [];
 
+  ArcticOperand.fromOperand(String operand) {
+    // TODO: implement fromOperand
+    mulOperand = [
+      ['a1', 'a2'],
+      ['a3', 'a4'],
+    ];
+    addOperand = [
+      ['b1'],
+      ['b2']
+    ];
+  }
+
+  ArcticOperand();
+
   @override
   String toString() {
     // TODO: implement toString
@@ -65,4 +79,28 @@ class ArcticOperand {
 class Expression {
   ArcticOperand lhs = ArcticOperand();
   ArcticOperand rhs = ArcticOperand();
+
+  Expression.fromOperands(String lhs, String rhs) {
+    this.lhs = ArcticOperand.fromOperand(lhs);
+    this.rhs = ArcticOperand.fromOperand(rhs);
+  }
+
+  Expression();
+
+  @override
+  String toString() {
+    List<String> funs = [];
+
+    for (var i = 0; i <= 1; i++) {
+      for (var j = 0; j <= 1; j++) {
+        funs.add("(assert (arc_gt (${lhs.mulOperand[i][j]}) (${rhs.mulOperand[i][j]})))");
+      }
+    }
+
+    for (var i = 0; i <= 1; i++) {
+      funs.add("(assert (arc_gt (${lhs.addOperand[i][0]}) (${rhs.addOperand[i][0]})))");
+    }
+
+    return funs.join('\n') + "\n";
+  }
 }
