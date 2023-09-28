@@ -39,7 +39,20 @@ class UniqueString {
       }
     }
 
-    funs.add("(assert (and (> ${string}_11 -1) (> ${string}_1 -1)))");
+    for (var i = 1; i <= 2; i++) {
+      if (i == 1) {
+        funs.add("(assert (> ${string}_${i} -1))");
+      } else {
+        funs.add("(assert (>= ${string}_${i} -1))");
+      }
+      for (var j = 1; j <= 2; j++) {
+        if (j == 1 && i == 1) {
+          funs.add("(assert (> ${string}_${i}${j} -1))");
+        } else {
+          funs.add("(assert (>= ${string}_${i}${j} -1))");
+        }
+      }
+    }
 
     return funs.join('\n') + "\n";
   }

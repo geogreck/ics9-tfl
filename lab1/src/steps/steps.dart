@@ -47,7 +47,7 @@ void WriteInitialPart(File f) {
 
   AppendFile(f, "(define-fun arc_add ((x Int) (y Int)) Int (max x y))");
   AppendFile(f,
-      "(define-fun arc_mul ((a Int) (b Int)) Int (+ a b))"); // TODO: invent me!!
+      "(define-fun arc_mul ((a Int) (b Int)) Int (ite (or (= a -1) (= b -1)) -1 (+ a b)))");
 
   AppendFile(f,
       "(define-fun arc_gt ((x Int) (y Int)) Bool (ite (or (> x y) (and (= x y) (= x -1))) true false))");
