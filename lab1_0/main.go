@@ -32,20 +32,7 @@ func main() {
 	word, err := trs.NewTermFromString(cfg.Word)
 	fmt.Printf("parsed word: %s\n", word)
 
-	// lhs, _ := trs.NewTermFromString("f(g(x,y,z),z,x)")
-	// rhs, _ := trs.NewTermFromString("f(g(a,b,c),a,a)")
-
-	// fmt.Println(lhs.IsCompatible(rhs))
-
-	// lhs, _ := trs.NewTermFromString("h(g(t,t))")
-	// rhs, _ := trs.NewTermFromString("h(t)")
-
-	// fmt.Println(rhs.BindArguments(lhs))
-	// fmt.Println(lhs.ApplyArgsBindings(lhs.BindArguments(rhs)))
-
-	// fmt.Println()
 	word.Unfold(trss, cfg.N)
 	fmt.Println(word.Unfold(trss, cfg.N))
-	// fmt.Println(trs.UnfoldTerm(word, trss, cfg.N))
 
 }

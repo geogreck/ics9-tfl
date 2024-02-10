@@ -190,7 +190,7 @@ func (lhs Term) isEquival(rhs Term, argsMap map[string]string) (bool, map[string
 }
 
 func (t Term) Unfold(trs TermRewritingSystem, n int) []Term {
-	// fmt.Printf("n = %d, word = '%s'\n", n, t)
+
 	res := make([]Term, 0)
 	if n == 0 {
 		res = append(res, t)
@@ -203,36 +203,27 @@ func (t Term) Unfold(trs TermRewritingSystem, n int) []Term {
 
 	for _, rule := range trs.Rules {
 		bindings := rule.LeftTerm.BindArguments(t)
-		// fmt.Println("!!!!", bindings, "word", t, "rule", rule)
+
 		if len(bindings) == 0 {
 			continue
 		}
 
 		newTerm := rule.RightTerm.ApplyArgsBindings(bindings)
-		// fmt.Printf("n = %d, queueing rebinded word = '%s'\n", n, newTerm)
+
 		res = append(res, newTerm.Unfold(trs, n-1)...)
 	}
 
-	// fmt.Printf("n = %d, word = '%s', starting arguments unwrap\n", n, t)
 	for i := 0; i < len(t.Arguments); i++ {
-		// fmt.Println("here")
+
 		newTerm := t.DeepCopy()
-		// fmt.Println("newterm:", newTerm)
 
-		// fmt.Printf("n = %d, queueing subterm word = '%s'\n", n, newTerm.Arguments[i])
 		newRes := newTerm.Arguments[i].Unfold(trs, n)
-		// fmt.Printf("n = %d, subterm word = '%s', newRes = %v\n", n, newTerm.Arguments[i], newRes)
-
-		// fmt.Println(newRes)
 
 		for _, newnewTerm := range newRes {
 			newnewnewTerm := newTerm.DeepCopy()
 			newnewnewTerm.Arguments[i] = newnewTerm
-			// fmt.Println(newnewTerm)
-			// fmt.Println(newTerm)
-			// fmt.Println(t)
+
 			res = append(res, newnewnewTerm)
-			// fmt.Println(*res)
 		}
 	}
 	return res
