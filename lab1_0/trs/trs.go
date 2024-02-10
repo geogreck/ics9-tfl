@@ -8,7 +8,7 @@ type TermRewritingSystem struct {
 	Rules []TermRule
 }
 
-func NewTermRewritingSystemFromString(str string) (TermRewritingSystem, error) {
+func NewTermRewritingSystemFromString(str string, variables []string) (TermRewritingSystem, error) {
 	var res TermRewritingSystem
 	streamer := avkstream.NewStream(str, []rune{})
 
@@ -17,7 +17,7 @@ func NewTermRewritingSystemFromString(str string) (TermRewritingSystem, error) {
 		for streamer.Peek() != '\n' && streamer.Peek() != 0 {
 			buf += string(streamer.Next())
 		}
-		rule, err := NewTermRuleFromString(buf)
+		rule, err := NewTermRuleFromString(buf, variables)
 		if err != nil {
 			return TermRewritingSystem{}, err
 		}

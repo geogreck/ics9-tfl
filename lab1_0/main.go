@@ -23,16 +23,15 @@ func main() {
 		panic(err)
 	}
 
-	trss, err := trs.NewTermRewritingSystemFromString(cfg.RawRules)
+	trss, err := trs.NewTermRewritingSystemFromString(cfg.RawRules, cfg.Variables)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Printf("parsed trs: %s\n", trss)
 
-	word, err := trs.NewTermFromString(cfg.Word)
+	word, err := trs.NewTermFromString(cfg.Word, cfg.Variables)
 	fmt.Printf("parsed word: %s\n", word)
 
 	word.Unfold(trss, cfg.N)
 	fmt.Println(word.Unfold(trss, cfg.N))
-
 }

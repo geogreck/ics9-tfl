@@ -11,7 +11,7 @@ type TermRule struct {
 	RightTerm Term
 }
 
-func NewTermRuleFromString(str string) (TermRule, error) {
+func NewTermRuleFromString(str string, variables []string) (TermRule, error) {
 
 	streamer := avkstream.NewStream(str, []rune{' '})
 
@@ -19,7 +19,7 @@ func NewTermRuleFromString(str string) (TermRule, error) {
 	for streamer.Peek() != '-' {
 		buf += string(streamer.Next())
 	}
-	leftTerm, err := NewTermFromString(buf)
+	leftTerm, err := NewTermFromString(buf, variables)
 	if err != nil {
 		return TermRule{}, fmt.Errorf("term rule parse error: %w", err)
 	}
@@ -33,7 +33,7 @@ func NewTermRuleFromString(str string) (TermRule, error) {
 	for streamer.Peek() != 0 {
 		buf += string(streamer.Next())
 	}
-	rightTerm, err := NewTermFromString(buf)
+	rightTerm, err := NewTermFromString(buf, variables)
 	if err != nil {
 		return TermRule{}, fmt.Errorf("term rule parse error: %w", err)
 	}
