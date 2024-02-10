@@ -2,6 +2,7 @@ package trs
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 )
 
@@ -104,40 +105,37 @@ func (t Term) String() string {
 	}
 }
 
-func (lhs *Term) BindArguments(rhs Term) map[string]Term {
+func (lhs *Term) BindArguments(rhs Term) (map[string]Term, error) {
 	res := make(map[string]Term)
-	lhs.bindArguments(rhs, &res)
+	err := lhs.bindArguments(rhs, &res)
 
-	return res
+	return res, err
 }
 
-func (lhs *Term) bindArguments(rhs Term, argsMap *map[string]Term) {
+func (lhs *Term) bindArguments(rhs Term, argsMap *map[string]Term) error {
 	if lhs.Type == TermTypeVariable {
 		if otherVar, exists := (*argsMap)[lhs.Symbol]; exists {
 			if !otherVar.IsEquival(rhs) {
-				clear(*argsMap)
+				return fmt.Errorf("error in args binding: got diffent binding for same arg")
 			}
-			return
+			return nil
 		}
 		(*argsMap)[lhs.Symbol] = rhs
-		return
+		return nil
 	}
 
 	if lhs.Symbol != rhs.Symbol || len(lhs.Arguments) != len(rhs.Arguments) {
-		clear(*argsMap)
-		return
+		return fmt.Errorf("error in args binding: unmatched terms signature")
 	}
 
 	for i := 0; i != len(lhs.Arguments); i++ {
-		lhs.Arguments[i].bindArguments(rhs.Arguments[i], argsMap)
-		if len(*argsMap) == 0 {
-			clear(*argsMap)
-
-			return
+		err := lhs.Arguments[i].bindArguments(rhs.Arguments[i], argsMap)
+		if err != nil {
+			return fmt.Errorf("error in args binding: recurse binding failed: %w", err)
 		}
 	}
 
-	return
+	return nil
 }
 
 func (t Term) ApplyArgsBindings(bindings map[string]Term) Term {
@@ -202,9 +200,9 @@ func (t Term) Unfold(trs TermRewritingSystem, n int) []Term {
 	}
 
 	for _, rule := range trs.Rules {
-		bindings := rule.LeftTerm.BindArguments(t)
+		bindings, err := rule.LeftTerm.BindArguments(t)
 
-		if len(bindings) == 0 {
+		if err != nil {
 			continue
 		}
 
