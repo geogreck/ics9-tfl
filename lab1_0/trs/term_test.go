@@ -1,6 +1,7 @@
 package trs
 
 import (
+	"slices"
 	"testing"
 )
 
@@ -141,6 +142,81 @@ func TestTerm_IsCompatible(t *testing.T) {
 			}
 			if got := lhs.IsEquival(tt.args.rhs); got != tt.want {
 				t.Errorf("Term.IsCompatible() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestTerm_Unfold(t *testing.T) {
+	type fields struct {
+		word      string
+		variables []string
+	}
+	type args struct {
+		trs string
+		n   int
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   []string
+	}{
+		{
+			name: "simple test 1",
+			fields: fields{
+				word:      "g(g(t,t),h(t))",
+				variables: []string{"t", "x", "y"},
+			},
+			args: args{
+				trs: `g(x,y) -> g(h(x),y)
+				h(t) -> f`,
+				n: 2,
+			},
+			want: []string{"g(f(),h(t))", "g(h(h(g(t,t))),h(t))", "g(h(g(h(t),t)),h(t))", "g(h(g(t,t)),f())", "g(g(h(h(t)),t),h(t))", "g(g(f(),t),h(t))", "g(g(h(t),t),f())"},
+		},
+		{
+			name: "test from TA 1",
+			fields: fields{
+				word:      "g(g(t,t),h(t))",
+				variables: []string{"x", "t"},
+			},
+			args: args{
+				trs: `g(x,x) -> h(x)
+				h(t) -> f`,
+				n: 2,
+			},
+			want: []string{"h(h(t))", "g(f(),h(t))", "g(h(t),f())"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tr, err := NewTermFromString(tt.fields.word, tt.fields.variables)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			trss, err := NewTermRewritingSystemFromString(tt.args.trs, tt.fields.variables)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+
+			got := tr.UnfoldDeep(trss, tt.args.n)
+			if len(got) != len(tt.want) {
+				t.Errorf("Term.Unfold() = %v, want %v", got, tt.want)
+				return
+			}
+
+			gotTerms := make([]string, 0)
+			for _, word := range got {
+				gotTerms = append(gotTerms, word.String())
+			}
+
+			for _, term := range gotTerms {
+				if !slices.Contains(tt.want, term) {
+					t.Errorf("Term.Unfold() = %v, want %v, ", got, tt.want)
+				}
 			}
 		})
 	}

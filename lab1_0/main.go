@@ -32,6 +32,13 @@ func main() {
 	word, err := trs.NewTermFromString(cfg.Word, cfg.Variables)
 	fmt.Printf("parsed word: %s\n", word)
 
-	word.Unfold(trss, cfg.N)
-	fmt.Println(word.Unfold(trss, cfg.N))
+	fmt.Println(word.UnfoldDeep(trss, cfg.N))
+
+	// word.Unfold(trss, cfg.N)
+	// fmt.Println(word.Unfold(trss, cfg.N))
+
+	// lhs, _ := trs.NewTermFromString("g(g(t,t),h(t))", []string{"t", "x"})
+	// rhs, _ := trs.NewTermFromString("g(x,x)", []string{"t", "x"})
+
+	// fmt.Println(rhs.BindArguments(lhs))
 }

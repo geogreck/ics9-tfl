@@ -146,7 +146,7 @@ func (lhs *Term) bindArguments(rhs Term, argsMap *map[string]Term) error {
 	}
 
 	if lhs.Symbol != rhs.Symbol || len(lhs.Arguments) != len(rhs.Arguments) {
-		return fmt.Errorf("error in args binding: unmatched terms signature")
+		return fmt.Errorf("error in args binding: unmatched terms signature, '%s' and '%s'", lhs, rhs)
 	}
 
 	for i := 0; i != len(lhs.Arguments); i++ {
@@ -208,8 +208,32 @@ func (lhs Term) isEquival(rhs Term, argsMap map[string]string) (bool, map[string
 	return true, argsMap
 }
 
+func (t Term) UnfoldDeep(trs TermRewritingSystem, n int) []Term {
+	words := []Term{t}
+	for i := 0; i < n; i++ {
+		newWords := make([]Term, 0)
+		for _, word := range words {
+			newWords = append(newWords, word.Unfold(trs, 1)...)
+		}
+		words = newWords
+	}
+	return removeDuplicateTerms(words)
+}
+
+func removeDuplicateTerms(termSlice []Term) []Term {
+	allKeys := make(map[string]bool)
+	list := []Term{}
+	for _, item := range termSlice {
+		if _, value := allKeys[item.String()]; !value {
+			allKeys[item.String()] = true
+			list = append(list, item)
+		}
+	}
+	return list
+}
+
 func (t Term) Unfold(trs TermRewritingSystem, n int) []Term {
-	fmt.Printf("n = %d, word = '%s'\n", n, t)
+	// fmt.Printf("n = %d, word = '%s'\n", n, t)
 	res := make([]Term, 0)
 	if n == 0 {
 		res = append(res, t)
@@ -222,14 +246,17 @@ func (t Term) Unfold(trs TermRewritingSystem, n int) []Term {
 
 	for _, rule := range trs.Rules {
 		bindings, err := rule.LeftTerm.BindArguments(t)
-		fmt.Println("!!!!", bindings, "word", t, "rule", rule)
 		if err != nil {
 			continue
 		}
+		// fmt.Println("!!!!", bindings, "word", t, "rule", rule)
 
 		newTerm := rule.RightTerm.ApplyArgsBindings(bindings)
-		fmt.Printf("n = %d, queueing rebinded word = '%s'\n", n, newTerm)
-		res = append(res, newTerm.Unfold(trs, n-1)...)
+		// fmt.Printf("n = %d, queueing rebinded word = '%s'\n", n, newTerm)
+		someRes := newTerm.Unfold(trs, n-1)
+		// fmt.Printf("n = %d, rebinded word resukt = '%s', someRes = %v\n", n, newTerm, someRes)
+		res = append(res, someRes...)
+
 	}
 
 	// fmt.Printf("n = %d, word = '%s', starting arguments unwrap\n", n, t)

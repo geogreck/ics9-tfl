@@ -1,7 +1,6 @@
 n: 2
-variables: [x, y, z]
+variables: [x, y, t]
 word: g(g(t,t),h(t))
-# Отступ в два пробела перед правилом обязателен
 rules: |
-  g(x,y) -> g(h(x),y)
+  g(x,x) -> h(x)
   h(t) -> f
