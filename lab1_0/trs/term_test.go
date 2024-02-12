@@ -188,6 +188,33 @@ func TestTerm_Unfold(t *testing.T) {
 			},
 			want: []string{"h(h(t))", "g(f(),h(t))", "g(h(t),f())"},
 		},
+		{
+			name: "test test",
+			fields: fields{
+				word:      "g(g(t,t),h(t))",
+				variables: []string{"x", "t"},
+			},
+			args: args{
+				trs: `g(x,x) -> h(x)
+				h(t) -> f`,
+				n: 1,
+			},
+			want: []string{"g(h(t),h(t))", "g(g(t,t),f())"},
+		},
+		{
+			name: "test test test",
+			fields: fields{
+				word:      "g(g(t,t),h(t))",
+				variables: []string{"x", "t"},
+			},
+			args: args{
+				trs: `g(x,x) -> h(x)
+				h(t) -> f(t)
+				f(t) -> d(t,t,t)`,
+				n: 4,
+			},
+			want: []string{"d(h(t),h(t),h(t))", "f(f(t))", "h(d(t,t,t))", "g(d(t,t,t),f(t))", "h(f(t))", "g(f(t),d(t,t,t))"},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -216,6 +243,145 @@ func TestTerm_Unfold(t *testing.T) {
 			for _, term := range gotTerms {
 				if !slices.Contains(tt.want, term) {
 					t.Errorf("Term.Unfold() = %v, want %v, ", got, tt.want)
+				}
+			}
+		})
+	}
+}
+
+func TestTerm_BindArguments(t *testing.T) {
+	type args struct {
+		lhsWord   string
+		variables []string
+		rhsWord   string
+	}
+	tests := []struct {
+		name      string
+		args      args
+		wantWords map[string]string
+		wantErr   bool
+	}{
+		{
+			name: "basic test ok",
+			args: args{
+				lhsWord:   "g(t, t)",
+				rhsWord:   "g(x, x)",
+				variables: []string{"x", "t"},
+			},
+			wantWords: map[string]string{
+				"t": "x",
+			},
+			wantErr: false,
+		},
+		{
+			name: "basic test fail",
+			args: args{
+				lhsWord:   "g(t, t)",
+				rhsWord:   "g(x, y)",
+				variables: []string{"x", "t"},
+			},
+			wantWords: map[string]string{},
+			wantErr:   true,
+		},
+		{
+			name: "basic test ok",
+			args: args{
+				lhsWord:   "g(t, t)",
+				rhsWord:   "g(x, x)",
+				variables: []string{"x", "t"},
+			},
+			wantWords: map[string]string{
+				"t": "x",
+			},
+			wantErr: false,
+		},
+		{
+			name: "mid test ok",
+			args: args{
+				lhsWord:   "g(x, y)",
+				rhsWord:   "g(g(a, b), c)",
+				variables: []string{"x", "y", "a", "b", "c"},
+			},
+			wantWords: map[string]string{
+				"x": "g(a,b)",
+				"y": "c",
+			},
+			wantErr: false,
+		},
+		{
+			name: "mid test fail",
+			args: args{
+				lhsWord:   "g(g(a, b), c)",
+				rhsWord:   "g(x, y)",
+				variables: []string{"x", "y", "a", "b", "c"},
+			},
+			wantWords: map[string]string{
+				"x": "g(a,b)",
+				"y": "c",
+			},
+			wantErr: true,
+		},
+		{
+			name: "big test ok",
+			args: args{
+				lhsWord:   "f(a,b,b)",
+				rhsWord:   "f(g(a,g(b)),h(a),h(a))",
+				variables: []string{"x", "y", "a", "b", "c"},
+			},
+			wantWords: map[string]string{
+				"a": "g(a,g(b))",
+				"b": "h(a)",
+			},
+			wantErr: false,
+		},
+		{
+			name: "big test ok",
+			args: args{
+				lhsWord:   "f(a,b,c)",
+				rhsWord:   "f(g(a,g(b)),h(a),h(a))",
+				variables: []string{"x", "y", "a", "b", "c"},
+			},
+			wantWords: map[string]string{
+				"a": "g(a,g(b))",
+				"b": "h(a)",
+				"c": "h(a)",
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			lhs, err := NewTermFromString(tt.args.lhsWord, tt.args.variables)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			rhs, err := NewTermFromString(tt.args.rhsWord, tt.args.variables)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+
+			got, err := lhs.BindArguments(rhs)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Term.BindArguments() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			gotWords := make(map[string]string)
+			for key, value := range got {
+				gotWords[key] = value.String()
+			}
+
+			if !tt.wantErr && len(got) != len(tt.wantWords) {
+				t.Errorf("Term.BindArguments() = %v, want %v", got, tt.wantWords)
+				return
+			}
+
+			for key, value := range gotWords {
+				if val, ok := tt.wantWords[key]; !tt.wantErr && (!ok || val != value) {
+					t.Errorf("Term.BindArguments() = %v, want %v", got, tt.wantWords)
+					return
 				}
 			}
 		})
