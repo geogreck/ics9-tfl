@@ -174,7 +174,7 @@ func TestTerm_Unfold(t *testing.T) {
 				h(t) -> f`,
 				n: 2,
 			},
-			want: []string{"g(f(),h(t))", "g(h(h(g(t,t))),h(t))", "g(h(g(h(t),t)),h(t))", "g(h(g(t,t)),f())", "g(g(h(h(t)),t),h(t))", "g(g(f(),t),h(t))", "g(g(h(t),t),f())"},
+			want: []string{"g(f,h(t))", "g(h(h(g(t,t))),h(t))", "g(h(g(h(t),t)),h(t))", "g(h(g(t,t)),f)", "g(g(h(h(t)),t),h(t))", "g(g(f,t),h(t))", "g(g(h(t),t),f)"},
 		},
 		{
 			name: "test from TA 1",
@@ -187,7 +187,7 @@ func TestTerm_Unfold(t *testing.T) {
 				h(t) -> f`,
 				n: 2,
 			},
-			want: []string{"h(h(t))", "g(f(),h(t))", "g(h(t),f())"},
+			want: []string{"h(h(t))", "g(f,h(t))", "g(h(t),f)"},
 		},
 		{
 			name: "test test",
@@ -200,7 +200,7 @@ func TestTerm_Unfold(t *testing.T) {
 				h(t) -> f`,
 				n: 1,
 			},
-			want: []string{"g(h(t),h(t))", "g(g(t,t),f())"},
+			want: []string{"g(h(t),h(t))", "g(g(t,t),f)"},
 		},
 		{
 			name: "test test test",
