@@ -30,7 +30,7 @@ func main() {
 	fmt.Printf("parsed trs: %s\n", trss)
 
 	word, err := trs.NewTermFromString(cfg.Word, cfg.Variables)
-	fmt.Printf("parsed word: %s\n", word)
+	fmt.Printf("parsed word: %+v\n", word)
 
 	fmt.Println(word.UnfoldDeep(trss, cfg.N))
 

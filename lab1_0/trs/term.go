@@ -166,6 +166,12 @@ func (t Term) ApplyArgsBindings(bindings map[string]Term) Term {
 		}
 		return t
 	}
+	if t.Type == TermTypeConstant {
+		if interpretation, exists := bindings[t.Symbol]; exists {
+			return interpretation
+		}
+		return t
+	}
 
 	newArgs := make([]Term, len(t.Arguments))
 	for i, arg := range t.Arguments {

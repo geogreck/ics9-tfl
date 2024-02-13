@@ -1,6 +1,7 @@
 package trs
 
 import (
+	"reflect"
 	"slices"
 	"testing"
 )
@@ -348,6 +349,18 @@ func TestTerm_BindArguments(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "ta test 2",
+			args: args{
+				lhsWord:   "g(f(z))",
+				rhsWord:   " g(f(z))",
+				variables: []string{"x", "t"},
+			},
+			wantWords: map[string]string{
+				"z": "z",
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -383,6 +396,79 @@ func TestTerm_BindArguments(t *testing.T) {
 					t.Errorf("Term.BindArguments() = %v, want %v", got, tt.wantWords)
 					return
 				}
+			}
+		})
+	}
+}
+
+func TestTerm_ApplyArgsBindings(t *testing.T) {
+	type args struct {
+		rhs       string
+		bindings  map[string]string
+		variables []string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "ta test 1",
+			args: args{
+				rhs: "g(f(z))",
+				bindings: map[string]string{
+					"z": "z",
+				},
+				variables: []string{},
+			},
+			want: "g(f(z))",
+		},
+		{
+			name: "test 2",
+			args: args{
+				rhs: "g(f(z))",
+				bindings: map[string]string{
+					"z": "g(z, z)",
+				},
+				variables: []string{},
+			},
+			want: "g(f(g(z,z)))",
+		},
+		{
+			name: "test 3",
+			args: args{
+				rhs: "g(f(z))",
+				bindings: map[string]string{
+					"z": "g(g(z))",
+				},
+				variables: []string{"x", "z"},
+			},
+			want: "g(f(g(g(z))))",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tr, err := NewTermFromString(tt.args.rhs, tt.args.variables)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			tb := make(map[string]Term)
+			for key, value := range tt.args.bindings {
+				trr, err := NewTermFromString(value, tt.args.variables)
+				if err != nil {
+					t.Error(err)
+					return
+				}
+				tb[key] = trr
+			}
+			tw, err := NewTermFromString(tt.want, tt.args.variables)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			if got := tr.ApplyArgsBindings(tb); !reflect.DeepEqual(got, tw) {
+				t.Errorf("Term.ApplyArgsBindings() = %v, want %v", got, tt.want)
 			}
 		})
 	}
